@@ -21,7 +21,25 @@ namespace MyHealthRecords.Controllers
         public AccountController()
         {
         }
+        public ActionResult AddUserToRole()
+        {
+            AddToRoleModel model = new AddToRoleModel();
+            model.roles = new List<string>() { "Admin", "Doctor", "Patient" };
+            return View(model);
+        }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public ActionResult AddUserToRole(AddToRoleModel model)
+        {
+            var email = model.email;
+            var user = UserManager.FindByEmail(model.email);
+            if (user == null)
+                throw new HttpException(404, "There is no user with email: " + model.email);
+
+            UserManager.AddToRole(user.Id, model.selectedRole);
+            return RedirectToAction("Index", "Home");
+        }
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
         {
             UserManager = userManager;
